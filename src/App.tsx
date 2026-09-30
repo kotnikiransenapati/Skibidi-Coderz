@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { ActiveScreen, CartItem, ProduceItem, OrderRecord, RolePanel } from './types';
+import { ActiveScreen, CartItem, ProduceItem, OrderRecord } from './types';
 import { INITIAL_PRODUCE, INITIAL_ORDERS } from './data/mockData';
 import {
   Header,
@@ -15,17 +15,19 @@ import {
   CommunityScreen,
   CheckoutScreen,
   MyOrdersScreen,
+  CustomerProfileScreen,
   CartDrawer,
   TraceModal,
   VideoModal,
   AddressModal,
   EscrowSuccessModal,
+  FloatingRolePortalWidget,
 } from './components';
 import { FarmerPanel, AdminPanel, SupportPanel } from './panels';
+import { firestoreService } from './services/firestoreService';
 
 export default function App() {
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>('landing');
-  const [currentRole, setCurrentRole] = useState<RolePanel>('customer');
   const [currentAddress, setCurrentAddress] = useState<string>('Bandra West, Mumbai 400050');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [produceList, setProduceList] = useState<ProduceItem[]>(INITIAL_PRODUCE);
@@ -57,25 +59,28 @@ export default function App() {
   const [isEscrowSuccessOpen, setIsEscrowSuccessOpen] = useState<boolean>(false);
   const [lastPlacedTotal, setLastPlacedTotal] = useState<number>(898.45);
 
-  // Fetch initial data from PostgreSQL via backend API
+  // Fetch real data from Firestore database with real-time listener
   useEffect(() => {
-    fetch('/api/produce')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && Array.isArray(data) && data.length > 0) {
-          setProduceList(data);
-        }
-      })
-      .catch((err) => console.log('Using default produce items:', err));
+    // Bootstrap Firestore collections with initial production-ready data if needed
+    firestoreService.initializeDatabase();
 
-    fetch('/api/orders')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && Array.isArray(data) && data.length > 0) {
-          setOrders(data);
-        }
-      })
-      .catch((err) => console.log('Using default orders:', err));
+    // Load real produce items
+    firestoreService.getProduceItems().then((data) => {
+      if (data && Array.isArray(data) && data.length > 0) {
+        setProduceList(data);
+      }
+    }).catch((err) => console.warn('Using fallback produce:', err));
+
+    // Listen to real-time orders in Firestore
+    const unsubscribeOrders = firestoreService.listenOrders((realOrders) => {
+      if (realOrders && Array.isArray(realOrders) && realOrders.length > 0) {
+        setOrders(realOrders);
+      }
+    });
+
+    return () => {
+      if (unsubscribeOrders) unsubscribeOrders();
+    };
   }, []);
 
   const cartCount = cart.reduce((acc, curr) => acc + curr.quantity, 0);
@@ -105,18 +110,33 @@ export default function App() {
     setCart([]);
   };
 
-  const handlePlaceOrder = async (total: number) => {
+  const handlePlaceOrder = async (
+    total: number,
+    paymentMeta?: { paymentId?: string; orderId?: string; method?: string }
+  ) => {
     setLastPlacedTotal(total);
+
+    // Capture items from current cart (or fallback default items if cart was empty)
+    const orderItems =
+      cart.length > 0
+        ? cart.map((c) => ({
+            name: c.item.name,
+            quantity: c.quantity,
+            price: c.item.price,
+            farmerName: c.item.farmer,
+          }))
+        : [
+            { name: 'Vine-Ripened Country Tomatoes (3 kg crate)', quantity: 3, price: 45, farmerName: 'Ramesh Patel' },
+            { name: 'Hydroponic Baby Spinach (500g)', quantity: 2, price: 40, farmerName: 'Ramesh Patel' },
+            { name: 'Organic Shimla Royal Delicious Apples (1 kg)', quantity: 2, price: 220, farmerName: 'Green Valley Orchards' },
+            { name: 'Raw Pure A2 Gir Cow Milk (1L Glass Bottle)', quantity: 2, price: 95, farmerName: 'Nandini Pastoral Dairy' },
+          ];
+
     const newOrder: OrderRecord = {
       id: `FD-${Math.floor(1000 + Math.random() * 9000)}`,
       date: 'Today',
-      items: cart.map((c) => ({
-        name: c.item.name,
-        quantity: c.quantity,
-        price: c.item.price,
-        farmerName: c.item.farmer,
-      })),
-      subtotal: total * 0.94,
+      items: orderItems,
+      subtotal: Math.round(total * 0.94),
       logisticsFee: 45,
       platformFee: 8.45,
       discount: 0,
@@ -127,19 +147,23 @@ export default function App() {
       driverName: 'Santosh Yadav',
       vanNumber: 'MH-15-EG-4402',
       eta: 'Today 12:45 PM',
+      paymentId: paymentMeta?.paymentId,
+      razorpayOrderId: paymentMeta?.orderId,
+      paymentMethod: paymentMeta?.method || 'Escrow Locked',
     };
 
     setOrders((prev) => [newOrder, ...prev]);
     setIsEscrowSuccessOpen(true);
 
+    // CRITICAL: Reset product cart card and basket after every order
+    setCart([]);
+    setIsCartDrawerOpen(false);
+
     try {
-      await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newOrder),
-      });
+      await firestoreService.saveOrder(newOrder);
+      console.log('Order successfully persisted in real Firestore database:', newOrder.id);
     } catch (err) {
-      console.error('Failed to sync order to database:', err);
+      console.error('Failed to sync order to Firestore database:', err);
     }
   };
 
@@ -149,7 +173,8 @@ export default function App() {
     );
 
     try {
-      await fetch(`/api/orders/${orderId}/release-escrow`, { method: 'POST' });
+      await firestoreService.releaseOrderEscrow(orderId);
+      console.log('Escrow release successfully persisted in Firestore for order:', orderId);
     } catch (err) {
       console.error('Failed to sync escrow release to database:', err);
     }
@@ -170,11 +195,8 @@ export default function App() {
     );
 
     try {
-      await fetch(`/api/orders/${orderId}/rate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rating, comment: reviewComment }),
-      });
+      await firestoreService.rateOrder(orderId, rating, reviewComment);
+      console.log('Order rating persisted in Firestore for order:', orderId);
     } catch (err) {
       console.error('Failed to sync rating to database:', err);
     }
@@ -192,12 +214,10 @@ export default function App() {
         currentAddress={currentAddress}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        currentRole={currentRole}
-        onSelectRole={setCurrentRole}
       />
 
       {/* Main Content Area */}
-      <div className="pt-28 lg:pt-32 flex-1">
+      <div className="pt-20 flex-1">
         {activeScreen === 'landing' && (
           <LandingScreen
             setActiveScreen={setActiveScreen}
@@ -257,6 +277,15 @@ export default function App() {
           />
         )}
 
+        {activeScreen === 'profile' && (
+          <CustomerProfileScreen
+            orders={orders}
+            currentAddress={currentAddress}
+            setActiveScreen={setActiveScreen}
+            openAddressModal={() => setIsAddressModalOpen(true)}
+          />
+        )}
+
         {activeScreen === 'farmer-panel' && (
           <div className="max-w-7xl mx-auto px-6 py-6 w-full">
             <FarmerPanel />
@@ -311,6 +340,12 @@ export default function App() {
         isOpen={isEscrowSuccessOpen}
         onClose={() => setIsEscrowSuccessOpen(false)}
         orderTotal={lastPlacedTotal}
+        setActiveScreen={setActiveScreen}
+      />
+
+      {/* Floating Stakeholder Portal Switcher (Non-intrusive role navigation) */}
+      <FloatingRolePortalWidget
+        activeScreen={activeScreen}
         setActiveScreen={setActiveScreen}
       />
     </div>

@@ -48,6 +48,14 @@ export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
   const [cardQuantities, setCardQuantities] = useState<{ [key: string]: number }>({});
   const [justAddedId, setJustAddedId] = useState<string | null>(null);
 
+  // Reset all product card cards, steppers, and badges whenever cart is cleared / after every order
+  useEffect(() => {
+    if (cart.length === 0) {
+      setCardQuantities({});
+      setJustAddedId(null);
+    }
+  }, [cart]);
+
   // Live Countdown Timer (1h 42m 19s)
   const [secondsRemaining, setSecondsRemaining] = useState<number>(1 * 3600 + 42 * 60 + 19);
 

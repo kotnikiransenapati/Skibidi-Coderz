@@ -3,165 +3,176 @@ import { ActiveScreen } from '../types';
 
 interface FooterProps {
   setActiveScreen: (screen: ActiveScreen) => void;
+  onOpenSpinWheel?: () => void;
+  onOpenAuditTrail?: () => void;
+  onOpenCustomer360?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ setActiveScreen }) => {
+export const Footer: React.FC<FooterProps> = ({
+  setActiveScreen,
+  onOpenSpinWheel,
+  onOpenAuditTrail,
+  onOpenCustomer360,
+}) => {
   return (
-    <footer className="w-full bg-surface-container-low mt-space-xl pt-space-xl pb-space-lg border-t border-surface-container-high/60">
-      <div className="max-w-7xl mx-auto px-gutter">
+    <footer className="w-full bg-slate-50 mt-16 pt-16 pb-12 border-t border-slate-200">
+      <div className="max-w-7xl mx-auto px-6">
         {/* 3 Pillars / Guarantee Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-space-md pb-space-xl">
-          <div className="bg-surface-container-lowest p-space-lg rounded-xl flex items-start gap-space-md shadow-[0_1px_3px_0_rgba(17,24,39,0.05)] border border-outline-variant/30">
-            <span className="material-symbols-outlined text-primary text-[32px] shrink-0">verified</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-12">
+          <div className="bg-white p-6 rounded-2xl flex items-start gap-4 shadow-xs border border-slate-200">
+            <span className="material-symbols-outlined text-emerald-700 text-[32px] shrink-0">verified</span>
             <div>
-              <h4 className="font-headline-sm text-on-surface font-semibold">100% Certified Organic</h4>
-              <p className="font-body-sm text-on-surface-variant mt-space-xs leading-relaxed">
-                PGS-India &amp; NPOP laboratory certified single-origin farmers directly traceable to farm coordinates.
+              <h4 className="font-bold text-slate-900 text-sm">100% Certified Organic</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                PGS-India &amp; NPOP laboratory certified single-origin farmers directly traceable to farm GPS coordinates.
               </p>
             </div>
           </div>
 
-          <div className="bg-surface-container-lowest p-space-lg rounded-xl flex items-start gap-space-md shadow-[0_1px_3px_0_rgba(17,24,39,0.05)] border border-outline-variant/30">
-            <span className="material-symbols-outlined text-secondary text-[32px] shrink-0">ac_unit</span>
+          <div className="bg-white p-6 rounded-2xl flex items-start gap-4 shadow-xs border border-slate-200">
+            <span className="material-symbols-outlined text-sky-700 text-[32px] shrink-0">ac_unit</span>
             <div>
-              <h4 className="font-headline-sm text-on-surface font-semibold">Cold-Chain Dispatch</h4>
-              <p className="font-body-sm text-on-surface-variant mt-space-xs leading-relaxed">
-                Farm harvest to your door in refrigerated eco-pods under 18 hours preserving live enzymes.
+              <h4 className="font-bold text-slate-900 text-sm">Cold-Chain Dispatch</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Farm harvest to your door in solar-refrigerated vans under 18 hours preserving crispness &amp; live enzymes.
               </p>
             </div>
           </div>
 
-          <div className="bg-surface-container-lowest p-space-lg rounded-xl flex items-start gap-space-md shadow-[0_1px_3px_0_rgba(17,24,39,0.05)] border border-outline-variant/30">
-            <span className="material-symbols-outlined text-tertiary text-[32px] shrink-0">shield</span>
+          <div className="bg-white p-6 rounded-2xl flex items-start gap-4 shadow-xs border border-slate-200">
+            <span className="material-symbols-outlined text-amber-700 text-[32px] shrink-0">shield</span>
             <div>
-              <h4 className="font-headline-sm text-on-surface font-semibold">FSSAI &amp; Escrow Trust</h4>
-              <p className="font-body-sm text-on-surface-variant mt-space-xs leading-relaxed">
-                Funds held securely in smart escrow and disbursed directly to farmer collectives upon quality acceptance.
+              <h4 className="font-bold text-slate-900 text-sm">FSSAI &amp; Escrow Trust</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Funds held securely in RBI-regulated escrow and disbursed to farmer collectives only upon quality inspection.
               </p>
             </div>
           </div>
         </div>
 
         {/* 4 Link Columns */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-space-xl py-space-xl border-t border-surface-container-high/60">
-          <div className="flex flex-col gap-space-sm">
-            <span className="font-label-lg text-on-surface font-bold uppercase tracking-wider text-xs">Marketplace</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-10 border-t border-slate-200 text-xs">
+          <div className="flex flex-col gap-2">
+            <span className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">Marketplace &amp; B2B</span>
             <button
               onClick={() => setActiveScreen('marketplace')}
-              className="font-body-sm text-on-surface-variant hover:text-primary transition-colors text-left"
+              className="text-slate-600 hover:text-emerald-800 transition-colors text-left cursor-pointer"
             >
-              Seasonal Harvests
+              Seasonal Morning Harvests
+            </button>
+            <button
+              onClick={() => setActiveScreen('wholesale')}
+              className="text-emerald-700 font-bold hover:text-emerald-900 transition-colors text-left cursor-pointer flex items-center gap-1"
+            >
+              <span>🏢 Wholesale B2B Portal (HORECA)</span>
             </button>
             <button
               onClick={() => setActiveScreen('marketplace')}
-              className="font-body-sm text-on-surface-variant hover:text-primary transition-colors text-left"
+              className="text-slate-600 hover:text-emerald-800 transition-colors text-left cursor-pointer"
             >
               Heirloom Staples &amp; Grains
             </button>
             <button
-              onClick={() => setActiveScreen('marketplace')}
-              className="font-body-sm text-on-surface-variant hover:text-primary transition-colors text-left"
+              onClick={onOpenSpinWheel}
+              className="text-amber-700 font-semibold hover:underline text-left cursor-pointer flex items-center gap-1"
             >
-              Artisanal Cold-Pressed
-            </button>
-            <button
-              onClick={() => setActiveScreen('marketplace')}
-              className="font-body-sm text-on-surface-variant hover:text-primary transition-colors text-left"
-            >
-              Weekly Harvest Baskets
+              <span>🎰 Spin-to-Win Harvest Wheel</span>
             </button>
           </div>
 
-          <div className="flex flex-col gap-space-sm">
-            <span className="font-label-lg text-on-surface font-bold uppercase tracking-wider text-xs">Traceability &amp; Tech</span>
+          <div className="flex flex-col gap-2">
+            <span className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">Traceability &amp; Tech</span>
             <button
               onClick={() => setActiveScreen('traceability')}
-              className="font-body-sm text-on-surface-variant hover:text-primary transition-colors text-left"
+              className="text-slate-600 hover:text-emerald-800 transition-colors text-left cursor-pointer"
             >
-              Regional Clusters
+              Regional Producer Clusters
             </button>
             <button
               onClick={() => setActiveScreen('traceability')}
-              className="font-body-sm text-on-surface-variant hover:text-primary transition-colors text-left"
+              className="text-slate-600 hover:text-emerald-800 transition-colors text-left cursor-pointer"
             >
-              Soil Health &amp; Lab Reports
+              Soil Health &amp; SGS Lab Reports
             </button>
             <button
               onClick={() => setActiveScreen('traceability')}
-              className="font-body-sm text-on-surface-variant hover:text-primary transition-colors text-left"
+              className="text-slate-600 hover:text-emerald-800 transition-colors text-left cursor-pointer"
             >
               QR Code Lot Verification
             </button>
             <button
-              onClick={() => setActiveScreen('traceability')}
-              className="font-body-sm text-on-surface-variant hover:text-primary transition-colors text-left"
+              onClick={onOpenCustomer360}
+              className="text-slate-600 hover:text-emerald-800 transition-colors text-left cursor-pointer"
             >
-              Direct Farmer Compensation
+              Customer 360 &amp; Loyalty Points
             </button>
           </div>
 
-          <div className="flex flex-col gap-space-sm">
-            <span className="font-label-lg text-on-surface font-bold uppercase tracking-wider text-xs">Community</span>
+          <div className="flex flex-col gap-2">
+            <span className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">Grower Community</span>
             <button
               onClick={() => setActiveScreen('community')}
-              className="font-body-sm text-on-surface-variant hover:text-primary transition-colors text-left"
+              className="text-slate-600 hover:text-emerald-800 transition-colors text-left cursor-pointer"
             >
               Farmer Diaries &amp; Audio Logs
             </button>
             <button
               onClick={() => setActiveScreen('community')}
-              className="font-body-sm text-on-surface-variant hover:text-primary transition-colors text-left"
+              className="text-slate-600 hover:text-emerald-800 transition-colors text-left cursor-pointer"
             >
               Farm Visits &amp; Volunteering
             </button>
             <button
-              onClick={() => setActiveScreen('community')}
-              className="font-body-sm text-on-surface-variant hover:text-primary transition-colors text-left"
+              onClick={() => setActiveScreen('farmer-panel')}
+              className="text-slate-600 hover:text-emerald-800 transition-colors text-left cursor-pointer"
             >
-              Seed Preservation Network
+              🚜 Smallholder Dispatch Desk
             </button>
             <button
-              onClick={() => setActiveScreen('community')}
-              className="font-body-sm text-on-surface-variant hover:text-primary transition-colors text-left"
+              onClick={() => setActiveScreen('support-panel')}
+              className="text-slate-600 hover:text-emerald-800 transition-colors text-left cursor-pointer"
             >
-              Organic Kitchen Recipes
+              🎧 Executive Support &amp; Arbitration
             </button>
           </div>
 
-          <div className="flex flex-col gap-space-sm">
-            <span className="font-label-lg text-on-surface font-bold uppercase tracking-wider text-xs">Certifications &amp; Safety</span>
-            <div className="flex flex-col gap-space-xs text-xs">
-              <span className="font-label-sm text-primary font-semibold">FSSAI Central Lic. No. 10020022011244</span>
-              <span className="font-body-sm text-on-surface-variant">NPOP India Organic Accredited</span>
-              <span className="font-body-sm text-on-surface-variant">Cold-Chain Trace Compliant</span>
-              <button
-                onClick={() => setActiveScreen('orders')}
-                className="font-body-sm text-secondary hover:underline mt-space-xs text-left"
-              >
-                Escrow Payout Guidelines
-              </button>
-            </div>
+          <div className="flex flex-col gap-2">
+            <span className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">Governance &amp; Portals</span>
+            <button
+              onClick={() => setActiveScreen('admin-panel')}
+              className="text-slate-600 hover:text-emerald-800 transition-colors text-left cursor-pointer font-semibold"
+            >
+              📊 Fleet Radar &amp; Escrow Console
+            </button>
+            <button
+              onClick={onOpenAuditTrail}
+              className="text-slate-600 hover:text-emerald-800 transition-colors text-left cursor-pointer"
+            >
+              🔐 Security Audit Trail &amp; Diffs
+            </button>
+            <span className="text-slate-400 font-mono text-[10px] pt-1">FSSAI Central Lic: 10020022011244</span>
+            <span className="text-slate-400 text-[10px]">RBI Smart Escrow Compliant</span>
           </div>
         </div>
 
         {/* Bottom Credits */}
-        <div className="pt-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md border-t border-surface-container-high/60">
+        <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-slate-200">
           <button
             onClick={() => setActiveScreen('landing')}
-            className="flex items-center gap-space-xs text-primary font-headline-sm font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 text-emerald-800 font-bold text-sm cursor-pointer hover:opacity-80 transition-opacity"
           >
-            <span className="material-symbols-outlined text-[22px]">spa</span>
+            <span className="material-symbols-outlined text-[22px]">eco</span>
             <span>FarmDirect Organics</span>
           </button>
-          <p className="font-body-sm text-outline text-center md:text-left text-xs">
+          <p className="text-slate-500 text-center md:text-left text-xs">
             © 2026 FarmDirect Agritech India Pvt. Ltd. Direct farm dispatch honoring ethical grower prosperity.
           </p>
-          <div className="flex items-center gap-space-md">
-            <span className="font-label-sm text-outline">Pure Origin</span>
-            <span className="font-label-sm text-outline">•</span>
-            <span className="font-label-sm text-outline">Zero Middlemen</span>
-            <span className="font-label-sm text-outline">•</span>
-            <span className="font-label-sm text-outline">Fair Trade</span>
+          <div className="flex items-center gap-3 text-xs font-semibold text-slate-400">
+            <span>Pure Origin</span>
+            <span>•</span>
+            <span>Zero Middlemen</span>
+            <span>•</span>
+            <span>94.1% Direct Escrow</span>
           </div>
         </div>
       </div>

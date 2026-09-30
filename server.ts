@@ -7,7 +7,7 @@ import { requireAuth, AuthRequest } from './src/middleware/auth.ts';
 import { getOrCreateUser, getUserByUid } from './src/db/users.ts';
 import { getAllOrders, createOrder, updateOrderEscrow, updateOrderRating } from './src/db/orders.ts';
 import { getProduceItems, getFarmClusters, seedDefaultData } from './src/db/produce.ts';
-import { backendRouter } from './src/backend/index.ts';
+import { backendRouter, paymentController } from './src/backend/index.ts';
 
 dotenv.config();
 
@@ -20,11 +20,9 @@ async function startServer() {
 
   app.use(express.json());
 
-  // Seed default items and clusters if needed on server start
-  try {
-    await seedDefaultData();
-  } catch (err) {
-    console.error('Initial DB seeding check error:', err);
+  // Seed default items and clusters if PostgreSQL is configured
+  if (process.env.SQL_HOST) {
+    seedDefaultData().catch((err) => console.error('Initial DB seeding check error:', err));
   }
 
   // --- API Endpoints ---
@@ -124,6 +122,11 @@ async function startServer() {
       res.status(500).json({ error: 'Failed to record rating' });
     }
   });
+
+  // Razorpay Standard Checkout Endpoints
+  app.post('/api/create-order', paymentController.createOrder);
+  app.post('/api/verify-payment', paymentController.verifyPayment);
+  app.post('/api/generate-test-signature', paymentController.generateTestSignature);
 
   // Mount modular backend router for cold-chain telemetry and role panels
   app.use('/api', backendRouter);

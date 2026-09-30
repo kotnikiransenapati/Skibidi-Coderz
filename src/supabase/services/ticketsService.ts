@@ -9,6 +9,7 @@ export interface SupportTicket {
   assignedExecutive: string;
   createdAt: string;
   reeferTempSnapshot?: string;
+  resolution?: string;
 }
 
 export const INITIAL_TICKETS: SupportTicket[] = [

@@ -20,9 +20,7 @@ export const MyOrdersScreen: React.FC<MyOrdersScreenProps> = ({
   const [activeTab, setActiveTab] = useState<'active' | 'past'>('active');
   const [showAnalytics, setShowAnalytics] = useState<boolean>(true);
   const [releaseFeedback, setReleaseFeedback] = useState<string | null>(null);
-  const [expandedTrackingId, setExpandedTrackingId] = useState<string | null>(
-    orders.find((o) => o.escrowStatus === 'Locked')?.id || orders[0]?.id || null
-  );
+  const [expandedTrackingId, setExpandedTrackingId] = useState<string | null>(null);
 
   const handleInspectAndRelease = (orderId: string) => {
     onReleaseEscrow(orderId);
